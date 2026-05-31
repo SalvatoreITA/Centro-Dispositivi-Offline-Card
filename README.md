@@ -16,10 +16,6 @@ Progettata per lavorare in perfetta sinergia con il backend [Centro Dispositivi 
   <img src="foto1.PNG" alt="Card Preview">
 </div>
 
-<div align="center">
-  <img src="foto2.PNG" alt="Card Preview">
-</div>
-
 ## ✨ Funzionalità Principali
 
 * **Design Premium Octopus Style:** Colori brillanti, bordi arrotondati e riquadri traslucidi per un'estetica moderna.
