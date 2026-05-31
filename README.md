@@ -13,7 +13,11 @@ Progettata per lavorare in perfetta sinergia con il backend [Centro Dispositivi 
 ## 📸 Anteprima
 
 <div align="center">
-  <img src="foto.png" alt="Card Preview">
+  <img src="foto1.png" alt="Card Preview">
+</div>
+
+<div align="center">
+  <img src="foto2.png" alt="Card Preview">
 </div>
 
 ## ✨ Funzionalità Principali
