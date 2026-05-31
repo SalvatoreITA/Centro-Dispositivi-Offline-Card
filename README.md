@@ -1,0 +1,1 @@
+# Centro-Dispositivi-Offline-Card
