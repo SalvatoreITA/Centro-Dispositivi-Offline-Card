@@ -19,6 +19,7 @@ class CentroOfflineCard extends HTMLElement {
   static getStubConfig() {
     return {
       title: "Centro Offline",
+      border_radius: 15, // <-- NUOVO: Valore di default
       automation_entity: "", 
       entity: "sensor.dispositivi_offline",
       online_entity: "sensor.dispositivi_online",
@@ -53,7 +54,6 @@ class CentroOfflineCard extends HTMLElement {
       this.shadowRoot.innerHTML = `
         <style>
           ha-card {
-            border-radius: 15px;
             padding: 16px;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -132,9 +132,8 @@ class CentroOfflineCard extends HTMLElement {
         this._toggleAutomation();
       });
 
-      // FIX CHUSURA ACCIDENTALE POPUP
       this.content.addEventListener("click", (e) => {
-        e.stopPropagation(); // Evita che il click rimbalzi fuori chiudendo subito la finestra
+        e.stopPropagation();
         this._showPopup();
       });
     }
@@ -153,6 +152,10 @@ class CentroOfflineCard extends HTMLElement {
     const countText = this.shadowRoot.getElementById("count-text");
     const listText = this.shadowRoot.getElementById("list-text");
     const iconSwitch = this.shadowRoot.getElementById("icon-switch");
+
+    // <-- NUOVO: Applicazione dinamica del Border Radius
+    const borderRadius = this.config.border_radius !== undefined ? this.config.border_radius : 15;
+    card.style.borderRadius = `${borderRadius}px`;
 
     const rawOffline = parseInt(offlineState.state);
     const offlineCount = isNaN(rawOffline) ? 0 : rawOffline;
@@ -175,7 +178,7 @@ class CentroOfflineCard extends HTMLElement {
       if (offlineCount === 1) {
         countText.innerHTML = `<span style="color: #ff4444; font-weight: bold;">⚠️ 1 Dispositivo offline su ${totalCount}</span>`;
       } else {
-        countText.innerHTML = `<span style="color: #ff4444; font-weight: bold;">⚠️ ${offlineCount} Dispositivi offline su ${totalCount}</span>`;
+        countText.innerHTML = `<span style="color: #ff4444; font-weight: bold;">⚠️ ${offlineCount} Dispositivi offline su${totalCount}</span>`;
       }
     } else {
       countText.innerHTML = `<span style="color: #00C851; font-weight: bold;">✅ Tutti i dispositivi sono online (${totalCount})</span>`;
@@ -244,7 +247,6 @@ class CentroOfflinePopupCard extends HTMLElement {
   }
 
   set hass(hass) {
-    // FIX: Se Home Assistant tenta di inviare aggiornamenti prima che la card sia caricata, fermalo!
     if (!this.config) return;
 
     if (!this.content) {
@@ -350,19 +352,18 @@ class CentroOfflinePopupCard extends HTMLElement {
         <div id="content"></div>
       `;
       this.content = this.shadowRoot.getElementById("content");
-      this.lastStateHash = ""; // Variabile per la memoria grafica
+      this.lastStateHash = ""; 
     }
 
     const offlineState = hass.states[this.config.entity];
     const onlineState = hass.states[this.config.online_entity];
     const totalState = hass.states[this.config.total_entity];
 
-    // FIX PRESTAZIONALE: Aggiorna il popup SOLO se c'è un vero cambiamento nella lista!
     const currentStateHash = JSON.stringify([offlineState, onlineState, totalState]);
     if (this.lastStateHash === currentStateHash) {
-      return; // Rilevato aggiornamento finto di HA (es. orologio che scatta), non ricreare il popup!
+      return; 
     }
-    this.lastStateHash = currentStateHash; // Salva la nuova memoria
+    this.lastStateHash = currentStateHash; 
 
     const rawOffline = offlineState ? parseInt(offlineState.state) : 0;
     const isOffline = !isNaN(rawOffline) && rawOffline > 0;
@@ -521,6 +522,16 @@ class CentroOfflineCardEditor extends LitElement {
             .value=${this._config.title !== undefined ? this._config.title : 'Centro Dispositivi Offline'}
             .configValue=${"title"}
             .label=${"Titolo della Card"}
+            @value-changed=${this._valueChanged}>
+          </ha-selector>
+
+          <!-- NUOVO: Selettore Border Radius (Slider) -->
+          <ha-selector
+            .hass=${this.hass}
+            .selector=${{ number: { min: 0, max: 50, step: 1, mode: "slider" } }}
+            .value=${this._config.border_radius !== undefined ? this._config.border_radius : 15}
+            .configValue=${"border_radius"}
+            .label=${"Arrotondamento Bordi (Border Radius)"}
             @value-changed=${this._valueChanged}>
           </ha-selector>
         </div>
