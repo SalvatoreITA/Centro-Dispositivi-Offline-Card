@@ -4,7 +4,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/SalvatoreITA/Centro-Dispositivi-Offline-Card/blob/main/README.md)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![version](https://img.shields.io/badge/version-v3.0.0-blue.svg)]()
+[![version](https://img.shields.io/badge/version-v3.0.1-blue.svg)]()
 [![maintainer](https://img.shields.io/badge/maintainer-Salvatore_Lentini_--_DomHouse.it-green.svg)](https://www.domhouse.it)
 
 **Centro Dispositivi Offline Card** è la card Lovelace pensata per il backend [Centro Dispositivi Offline](https://github.com/SalvatoreITA/Centro-Dispositivi-Offline): ti mostra a colpo d'occhio quali dispositivi sono offline, da quanto tempo e perché.
