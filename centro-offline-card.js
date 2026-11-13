@@ -17,7 +17,7 @@ const COC_DEFAULTS = {
   entity: "sensor.dispositivi_offline",
   online_entity: "sensor.dispositivi_online",
   total_entity: "sensor.dispositivi_totali",
-  notify_entity: "switch.notifiche_dispositivi_offline",
+  automation_entity: "",
   layout: "hero",
   max_chips: 6,
   show_progress: true,
@@ -168,9 +168,7 @@ class CentroOfflineCard extends HTMLElement {
 
   setConfig(config) {
     if (!config) throw new Error("Configurazione non valida");
-    // Retro-compatibilità con la v2: automation_entity / switch_entity
-    const notify = config.notify_entity ?? config.automation_entity ?? config.switch_entity;
-    this._config = { ...COC_DEFAULTS, ...config, notify_entity: notify ?? COC_DEFAULTS.notify_entity };
+    this._config = { ...COC_DEFAULTS, ...config };
     this._lastKey = null;
     if (this._hass) this._render();
   }
@@ -325,7 +323,7 @@ class CentroOfflineCard extends HTMLElement {
   _bell(notifyState) {
     const on = notifyState && notifyState.state === "on";
     return `<button class="bell ${on ? "on" : ""}" ${notifyState ? "" : "hidden"}
-              title="${on ? "Notifiche attive" : "Notifiche disattivate"}" aria-label="Notifiche">
+              title="${on ? "Automazione notifiche attiva" : "Automazione notifiche disattivata"}" aria-label="Notifiche">
               <ha-icon icon="${on ? "mdi:bell-ring" : "mdi:bell-off-outline"}"></ha-icon></button>`;
   }
 
@@ -342,7 +340,7 @@ class CentroOfflineCard extends HTMLElement {
     const cfg = this._config;
     const hass = this._hass;
     const data = cocCollect(hass, cfg);
-    const notifyState = cfg.notify_entity ? hass.states[cfg.notify_entity] : null;
+    const notifyState = cfg.automation_entity ? hass.states[cfg.automation_entity] : null;
 
     const key = JSON.stringify([cfg, data, notifyState && notifyState.state]);
     if (key === this._lastKey) return;
@@ -373,8 +371,8 @@ class CentroOfflineCard extends HTMLElement {
     const bell = root.querySelector(".bell");
     if (bell) bell.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (!cfg.notify_entity) return;
-      this._hass.callService("homeassistant", "toggle", { entity_id: cfg.notify_entity });
+      if (!cfg.automation_entity) return;
+      this._hass.callService("automation", "toggle", { entity_id: cfg.automation_entity });
     });
   }
 
@@ -526,7 +524,7 @@ class CentroOfflineDialog extends HTMLElement {
         .search ha-icon { --mdc-icon-size:18px; color: var(--secondary-text-color); }
         .search input { flex:1; border:none; outline:none; background:transparent; color:inherit;
                         font: inherit; font-size:14px; padding: 10px 0; }
-        .list { overflow:auto; padding: 4px 10px 10px; }
+        .list { overflow:auto; padding: 4px 10px 14px; }
         .row { display:flex; align-items:center; gap:12px; padding:10px 8px; border-radius:14px; cursor:pointer; transition: background .15s; }
         .row:hover { background: rgba(127,127,127,.1); }
         .row + .row { border-top: 1px solid var(--divider-color); border-radius:0; }
@@ -542,8 +540,6 @@ class CentroOfflineDialog extends HTMLElement {
         .ago { font-size:11px; color: var(--secondary-text-color); }
         .empty { text-align:center; padding: 34px 10px; color: var(--secondary-text-color); font-size:13px; }
         .empty ha-icon { --mdc-icon-size: 44px; color: var(--coc-ok); display:block; margin: 0 auto 10px; }
-        footer { flex:0 0 auto; text-align:center; font-size:11px; color: var(--secondary-text-color); padding: 8px 0 14px; opacity:.8;
-                 border-top: 1px solid var(--divider-color); }
       </style>
       <div class="scrim"></div>
       <div class="panel" role="dialog" aria-modal="true">
@@ -556,7 +552,6 @@ class CentroOfflineDialog extends HTMLElement {
         </div>
         <div class="search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" placeholder="Cerca dispositivo…"></div>
         <div class="list"></div>
-        <footer>Salvatore Lentini · DomHouse.it</footer>
       </div>`;
 
     const sr = this.shadowRoot;
@@ -688,8 +683,8 @@ class CentroOfflineCardEditor extends HTMLElement {
       { key: "show_progress", label: "Mostra barra (layout Hero)", selector: { boolean: {} } },
       { key: "max_chips", label: "Riquadri dispositivi offline mostrati nella card", selector: { number: { min: 0, max: 20, step: 1, mode: "box" } } },
       { group: "🔔 Notifiche" },
-      { key: "notify_entity", label: "Interruttore notifiche (switch o automazione)",
-        selector: { entity: { domain: ["switch", "automation", "input_boolean"] } } },
+      { key: "automation_entity", label: "Automazione delle notifiche (comandata dalla campanella)",
+        selector: { entity: { domain: "automation" } } },
       { group: "⚙️ Sensori dell'integrazione" },
       { key: "entity", label: "Sensore dispositivi offline", selector: { entity: { domain: "sensor" } } },
       { key: "online_entity", label: "Sensore dispositivi online", selector: { entity: { domain: "sensor" } } },
@@ -740,7 +735,6 @@ class CentroOfflineCardEditor extends HTMLElement {
   _sync() {
     if (!this._built || !this._config) return;
     const cfg = { ...COC_DEFAULTS, ...this._config };
-    if (this._config.automation_entity && !this._config.notify_entity) cfg.notify_entity = this._config.automation_entity;
     for (const [key, sel] of Object.entries(this._selectors)) {
       sel.hass = this._hass;
       sel.value = cfg[key];
@@ -749,11 +743,8 @@ class CentroOfflineCardEditor extends HTMLElement {
 
   _changed(key, value) {
     const cfg = { ...this._config };
-    delete cfg.automation_entity;
-    delete cfg.switch_entity;
     if (value === "" || value === undefined || value === null || value === COC_DEFAULTS[key]) delete cfg[key];
     else cfg[key] = value;
-    if (key === "notify_entity" && (value === "" || value == null)) cfg.notify_entity = ""; // bell disattivata
     this._config = cfg;
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: cfg }, bubbles: true, composed: true }));
   }
