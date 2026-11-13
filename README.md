@@ -1,4 +1,7 @@
-# 📡 DomHouse - Centro Dispositivi Offline Card
+# 📡 DomHouse - Centro Dispositivi Offline (Card)
+
+[![it](https://img.shields.io/badge/lang-it-green.svg)](hCentro-Dispositivi-Offline-Card/blob/main/README_it.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/SalvatoreITA/Centro-Dispositivi-Offline-Card/blob/main/README.md)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![version](https://img.shields.io/badge/version-v3.0.0-blue.svg)]()
@@ -20,7 +23,7 @@
 * **Stile Hero:** intestazione colorata (rosso/arancio in allarme, verde/azzurro quando è tutto ok) con il numero grande dei dispositivi offline e la barra di stato della rete.
 * **Riquadri dei dispositivi offline:** icona del tipo di entità, nome e da quanto tempo è offline (o se è stata eliminata/disabilitata).
 * **Popup integrato, senza browser_mod:** schede Offline / Online / Tutti, ricerca, motivo dello stato (`Non disponibile`, `Sconosciuto`, `Non trovata`, `Disabilitata`) e tempo. Toccando un dispositivo si apre la sua finestra *more-info* di Home Assistant. Su smartphone si apre dal basso a tutto schermo.
-* **Campanella:** attiva/disattiva le notifiche con lo switch `switch.notifiche_dispositivi_offline` dell'integrazione (o con la tua automazione).
+* **Campanella:** attiva/disattiva l'automazione delle notifiche, come nella v2 (si sceglie nell'editor).
 * **Altri stili:** oltre a *Hero* sono disponibili *Anello* (grafico circolare) e *Compatta* (una riga).
 * **Editor grafico** completo, tema chiaro e scuro, compatibile con le dashboard a sezioni.
 
@@ -33,7 +36,7 @@
 ### Tramite HACS (consigliato)
 1. Apri **HACS** > tre puntini in alto a destra > **Repository personalizzati**.
 2. Incolla `https://github.com/SalvatoreITA/Centro-Dispositivi-Offline-Card` e scegli la categoria **Dashboard**.
-3. Cerca **Centro Offline Card**, clicca su **Scarica** e ricarica il browser.
+3. Cerca **Centro Dispositivi Offline Card**, clicca su **Scarica** e ricarica il browser.
 
 ### Manuale
 1. Copia `centro-offline-card.js` nella cartella `www/` di Home Assistant.
@@ -53,7 +56,7 @@ layout: hero            # hero | ring | compact
 border_radius: 16
 show_progress: true     # barra di stato nell'intestazione
 max_chips: 6            # riquadri offline mostrati nella card (0 = nessuno)
-notify_entity: switch.notifiche_dispositivi_offline   # oppure un'automazione
+automation_entity: automation.notifiche_dispositivi_offline   # automazione comandata dalla campanella
 entity: sensor.dispositivi_offline
 online_entity: sensor.dispositivi_online
 total_entity: sensor.dispositivi_totali
